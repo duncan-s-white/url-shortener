@@ -3,52 +3,42 @@
 namespace App\Services;
 
 use App\Models\Url;
-use Illuminate\Support\Facades\DB;
 
 class UrlShorteningService
 {
 
     public const DOMAIN_NAME = 'http://short.est/';
 
-    /**
-     * Create a new UrlShorteningService instance.
-     */
-    public function __construct()
-    {
-        //
-    }
-
     public function saveUrl($longUrl): Url
     {
+        $shortUrl = self::DOMAIN_NAME . $this->encodeUrl($longUrl);
+
+        // Check if Url exists in the database already
+
         $url = Url::create([
             'long_url' => $longUrl,
-            'short_url' => "",
+            'short_url' => $shortUrl,
         ]);
 
         $url->save();
 
-        // Use Redis to create the Number for the encoded Url? 
-        // Quicker no need to save twice
-        $url->short_url = self::DOMAIN_NAME . $this->encodeUrl($url->id);
-
-        $url->save();
-
         return $url;
     }
 
-    protected function encodeUrl($number): string
+    public function retrieveUrl($shortUrl): Url
     {
-        // Improve the encode Url function returning 'xxAAAAA' currently
-        return strtr(rtrim(base64_encode(pack('i', $number)), '='), '+/', '-_');
-    }
-
-    public function retrieveUrl($shortUrl)
-    {
-        $url = DB::table('urls')
-            ->select('short_url', 'long_url', 'created_at')
+        $url = Url::select()
             ->where('short_url', '=', $shortUrl)
             ->firstOrFail();
 
         return $url;
+    }
+
+    protected function encodeUrl($longUrl): string
+    {
+        $md5Url = md5($longUrl);
+        $first6bytesOfHash = bin2hex(substr(hex2bin($md5Url), 0, 6));
+        $decimalStr = hexdec($first6bytesOfHash);
+        return strtr(rtrim(base64_encode(pack('i', $decimalStr)), '='), '+/', '-_');
     }
 }
