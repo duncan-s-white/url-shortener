@@ -7,31 +7,27 @@ use App\Models\Url;
 class UrlShorteningService
 {
 
-    public const DOMAIN_NAME = 'http://short.est/';
-
     public function saveUrl($longUrl): Url
     {
-        $shortUrl = self::DOMAIN_NAME . $this->encodeUrl($longUrl);
+        $existingUrl = Url::where('long_url', '=', $longUrl)->first();
 
-        // Check if Url exists in the database already
+        if ($existingUrl) {
+            return $existingUrl;
+        }
 
-        $url = Url::create([
+        $shortUrl = config('urlshortener.domain') . $this->encodeUrl($longUrl);
+
+        $newUrl = Url::create([
             'long_url' => $longUrl,
             'short_url' => $shortUrl,
         ]);
 
-        $url->save();
-
-        return $url;
+        return $newUrl;
     }
 
     public function retrieveUrl($shortUrl): Url
     {
-        $url = Url::select()
-            ->where('short_url', '=', $shortUrl)
-            ->firstOrFail();
-
-        return $url;
+        return Url::where('short_url', '=', $shortUrl)->firstOrFail();
     }
 
     protected function encodeUrl($longUrl): string
@@ -39,6 +35,9 @@ class UrlShorteningService
         $md5Url = md5($longUrl);
         $first6bytesOfHash = bin2hex(substr(hex2bin($md5Url), 0, 6));
         $decimalStr = hexdec($first6bytesOfHash);
-        return strtr(rtrim(base64_encode(pack('i', $decimalStr)), '='), '+/', '-_');
+        $binaryStr = pack('i', $decimalStr);
+        $encodedStr = rtrim(base64_encode($binaryStr), '=');
+        $urlsafeEncodedStr = strtr($encodedStr, '+/', '-_');
+        return $urlsafeEncodedStr;
     }
 }

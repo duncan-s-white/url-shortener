@@ -2,9 +2,9 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\Url;
 use Illuminate\Database\Seeder;
+use Tests\Feature\UrlShorteningApiTest;
 
 class DatabaseSeeder extends Seeder
 {
@@ -13,11 +13,12 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
+        $shortUrlData = UrlShorteningApiTest::provideShortUrlData();
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
+        foreach ($shortUrlData['test_short_urls'] as $shortUrl) {
+            Url::factory()->create([
+                'short_url' => $shortUrl,
+            ]);
+        }
     }
 }

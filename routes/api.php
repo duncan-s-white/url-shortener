@@ -3,6 +3,6 @@
 use App\Http\Controllers\UrlShorteningController;
 use Illuminate\Support\Facades\Route;
 
-Route::post('/encode', [UrlShorteningController::class, 'encode']);
+Route::post('/encode', [UrlShorteningController::class, 'store']);
 
-Route::post('/decode', [UrlShorteningController::class, 'decode']);
+Route::get('/decode', [UrlShorteningController::class, 'show']);

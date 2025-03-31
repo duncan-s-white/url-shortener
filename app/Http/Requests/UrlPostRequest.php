@@ -24,7 +24,7 @@ class UrlPostRequest extends FormRequest
     public function rules(): array
     {
         return [
-            "longUrl" => "required|url"
+            "longUrl" => "required|url|max:2048"
         ];
     }
 
@@ -34,6 +34,6 @@ class UrlPostRequest extends FormRequest
             'success'   => false,
             'message'   => 'Validation errors',
             'data'      => $validator->errors()
-        ]));
+        ], 400));
     }
 }

@@ -16,8 +16,7 @@ class UrlResource extends JsonResource
     {
         return [
             'shortUrl' => $this->short_url,
-            'longUrl' => $this->long_url,
-            'createdAt' => $this->created_at
+            'longUrl' => $this->long_url
         ];
     }
 }

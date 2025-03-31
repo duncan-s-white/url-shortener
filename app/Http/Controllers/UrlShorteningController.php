@@ -14,12 +14,11 @@ class UrlShorteningController extends Controller
     public function __construct(private UrlShorteningService $urlShorteningService) {}
 
     /**
-     * Encode endpoint.
+     * Encode and Store the Url endpoint.
      */
-    public function encode(UrlPostRequest $request): Response
+    public function store(UrlPostRequest $request): Response
     {
         $longUrl = $request->input('longUrl');
-
         $response = $this->urlShorteningService->saveUrl($longUrl);
 
         return response(new UrlResource($response), 201)
@@ -27,15 +26,13 @@ class UrlShorteningController extends Controller
     }
 
     /**
-     * Decode endpoint.
+     * Decode and Show the Url endpoint.
      */
-    public function decode(Request $request): Response
+    public function show(Request $request): Response
     {
-        $shortUrl = $request->input('shortUrl');
+        $shortUrl = $request->shortUrl;
 
         $response = $this->urlShorteningService->retrieveUrl($shortUrl);
-
-        return response(new UrlResource($response), 201)
-            ->header('Content-Type', 'application/json');
+        return response(new UrlResource($response), 200)->header('Content-Type', 'application/json');
     }
 }
